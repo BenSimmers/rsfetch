@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
     branches:
       - main
   release:
-    types: [created]
+    types: [created]  # Ensure it triggers on new releases
 
 jobs:
   build:
@@ -55,6 +55,7 @@ jobs:
 
   release:
     needs: build
+    if: github.event_name == 'release'  # Ensure this runs only on a release event
     runs-on: ubuntu-latest
 
     steps:
@@ -69,12 +70,7 @@ jobs:
       - name: Build release binary
         run: cargo build --release
 
-      - name: Upload release binary
-        uses: actions/upload-release-asset@v1
+      - name: Upload release binary with GitHub CLI
+        run: gh release upload ${{ github.event.release.tag_name }} ./target/release/rsfetch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./target/release/rsfetch
-          asset_name: rsfetch
-          asset_content_type: application/octet-stream
