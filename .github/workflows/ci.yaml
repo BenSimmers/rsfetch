@@ -4,14 +4,16 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*'  # Trigger workflow on versioned tags like v1.0.0
   pull_request:
     branches:
       - main
   release:
-    types: [created]  # Triggers only when a new release is created
+    types: [created]  # Triggers when a GitHub release is created manually
 
 permissions:
-  contents: write  # Allows uploading assets with GITHUB_TOKEN
+  contents: write  # Allows GitHub Actions to upload assets
 
 jobs:
   build:
@@ -59,13 +61,9 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')  # Only run if a versioned tag is pushed
 
     steps:
-      - name: Debug GitHub Event
-        run: |
-          echo "Triggered by: ${{ github.event_name }}"
-          echo "Release Tag: ${{ github.event.release.tag_name }}"
-
       - name: Checkout code
         uses: actions/checkout@v2
         with:
@@ -73,16 +71,16 @@ jobs:
 
       - name: Get latest tag
         id: get_tag
-        run: echo "TAG_NAME=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
+        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
-      - name: Verify Tag
+      - name: Authenticate GitHub CLI
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+
+      - name: Create GitHub Release (if missing)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Detected tag: $TAG_NAME"
-
-      - name: Set up Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
+          gh release create "$TAG_NAME" --title "Release $TAG_NAME" --notes "Automated release" || echo "Release already exists"
 
       - name: Build release binary
         run: cargo build --release
