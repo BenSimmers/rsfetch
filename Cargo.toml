@@ -1,0 +1,9 @@
+[package]
+name = "rsfetch"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+sysinfo = "0.29.0"
+whoami = "1.2.0"
+colored = "3.0.0"
