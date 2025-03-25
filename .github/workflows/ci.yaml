@@ -8,10 +8,10 @@ on:
     branches:
       - main
   release:
-    types: [created]  # Triggers on new releases
+    types: [created]  # Triggers only when a new release is created
 
 permissions:
-  contents: write  # Ensures GITHUB_TOKEN can upload assets
+  contents: write  # Allows uploading assets with GITHUB_TOKEN
 
 jobs:
   build:
@@ -61,8 +61,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Debug GitHub Event
+        run: |
+          echo "Triggered by: ${{ github.event_name }}"
+          echo "Release Tag: ${{ github.event.release.tag_name }}"
+
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Ensure all tags are available
+
+      - name: Get latest tag
+        id: get_tag
+        run: echo "TAG_NAME=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
+
+      - name: Verify Tag
+        run: |
+          echo "Detected tag: $TAG_NAME"
 
       - name: Set up Rust
         uses: actions-rs/toolchain@v1
@@ -76,4 +91,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload "${{ github.event.release.tag_name }}" ./target/release/rsfetch --clobber
+          gh release upload "$TAG_NAME" ./target/release/rsfetch --clobber
