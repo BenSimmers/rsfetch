@@ -8,7 +8,10 @@ on:
     branches:
       - main
   release:
-    types: [created]  # Ensure it triggers on new releases
+    types: [created]  # Triggers on new releases
+
+permissions:
+  contents: write  # Ensures GITHUB_TOKEN can upload assets
 
 jobs:
   build:
@@ -55,7 +58,6 @@ jobs:
 
   release:
     needs: build
-    if: github.event_name == 'release'  # Ensure this runs only on a release event
     runs-on: ubuntu-latest
 
     steps:
@@ -70,7 +72,8 @@ jobs:
       - name: Build release binary
         run: cargo build --release
 
-      - name: Upload release binary with GitHub CLI
-        run: gh release upload ${{ github.event.release.tag_name }} ./target/release/rsfetch
+      - name: Upload release binary
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ github.event.release.tag_name }} ./target/release/rsfetch
