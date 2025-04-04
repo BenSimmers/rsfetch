@@ -15,8 +15,8 @@ pub fn system_info(system: &System) {
         .cpus()
         .first()
         .map_or("Unknown".to_string(), |cpu| cpu.brand().to_string());
-    let memory_used = system.used_memory() / 1024;
-    let memory_total = system.total_memory() / 1024;
+    let memory_used = system.used_memory() / 1024 / 1024; // Convert to GB
+    let memory_total = system.total_memory() / 1024 / 1024;
 
     println!("User: {}@{}", username, hostname);
     println!("---------------------------------------");

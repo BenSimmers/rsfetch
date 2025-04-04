@@ -5,7 +5,6 @@ rsfetch is a lightweight and customizable system information fetcher written in 
 <!-- add status icons for the repo -->
 ![GitHub release](https://img.shields.io/github/v/release/BenSimmers/rsfetch)
 ![License](https://img.shields.io/github/license/BenSimmers/rsfetch)
-
 ## Table of Contents
 - [rsfetch](#rsfetch)
   - [Table of Contents](#table-of-contents)
