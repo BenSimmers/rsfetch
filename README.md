@@ -17,7 +17,11 @@ rsfetch is a lightweight and customizable system information fetcher written in 
 
 ## Get latest release
 ```bash
-curl -s https://api.github.com/repos/BenSimmers/rsfetch/releases/latest | grep "browser_download_url" | cut -d '"' -f 4 | wget -qi -
+curl -s https://api.github.com/repos/BenSimmers/rsfetch/releases/latest \
+| grep "browser_download_url" \
+| head -n 1 \
+| cut -d '"' -f 4 \
+| xargs wget
 ```
 ## Features
 - Displays system information such as OS, kernel, uptime, memory usage, and more.
